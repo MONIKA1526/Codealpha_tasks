@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Mini Twitter</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Mini Twitter</h1>
+
+<h3>Register</h3>
+<input id="regUser" placeholder="username">
+<input id="regPass" placeholder="password">
+<button onclick="register()">Register</button>
+
+<h3>Login</h3>
+<input id="loginUser" placeholder="username">
+<input id="loginPass" placeholder="password">
+<button onclick="login()">Login</button>
+
+<h3>Create Tweet</h3>
+<textarea id="tweetText" placeholder="What's happening?"></textarea>
+<br>
+<button onclick="tweet()">Tweet</button>
+
+<h2>Timeline</h2>
+<div id="tweets"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
+body{
+font-family: Arial;
+background:#e6ecf0;
+padding:20px;
+}
+
+textarea{
+width:300px;
+height:70px;
+}
+
+button{
+padding:6px 12px;
+background:#1DA1F2;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+.tweet{
+background:white;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+}
+const API="http://localhost:3000"
+
+let currentUser=""
+
+// REGISTER
+async function register(){
+
+const username=document.getElementById("regUser").value
+const password=document.getElementById("regPass").value
+
+await fetch(API+"/register",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({username,password})
+})
+
+alert("Registered")
+}
+
+// LOGIN
+async function login(){
+
+const username=document.getElementById("loginUser").value
+const password=document.getElementById("loginPass").value
+
+const res=await fetch(API+"/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({username,password})
+})
+
+const msg=await res.text()
+
+alert(msg)
+
+if(msg==="Login success"){
+currentUser=username
+loadTweets()
+}
+}
+
+// POST TWEET
+async function tweet(){
+
+const text=document.getElementById("tweetText").value
+
+await fetch(API+"/tweet",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+username:currentUser,
+text
+})
+})
+
+loadTweets()
+}
+
+// LOAD TWEETS
+async function loadTweets(){
+
+const res=await fetch(API+"/tweets")
+const tweets=await res.json()
+
+const container=document.getElementById("tweets")
+
+container.innerHTML=""
+
+tweets.forEach(t=>{
+
+container.innerHTML+=`
+<div class="tweet">
+<b>${t.username}</b>
+<p>${t.text}</p>
+Likes: ${t.likes}
+<br>
+<button onclick="likeTweet('${t._id}')">Like</button>
+<input id="c${t._id}" placeholder="comment">
+<button onclick="commentTweet('${t._id}')">Comment</button>
+<p>${t.comments.join(", ")}</p>
+</div>
+`
+
+})
+
+}
+
+// LIKE
+async function likeTweet(id){
+
+await fetch(API+"/like/"+id,{method:"POST"})
+loadTweets()
+
+}
+
+// COMMENT
+async function commentTweet(id){
+
+const comment=document.getElementById("c"+id).value
+
+await fetch(API+"/comment/"+id,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({comment})
+})
+
+loadTweets()
+}
