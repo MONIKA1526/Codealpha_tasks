@@ -1,0 +1,78 @@
+const express = require("express")
+const mongoose = require("mongoose")
+const cors = require("cors")
+const bodyParser = require("body-parser")
+
+const app = express()
+
+app.use(cors())
+app.use(bodyParser.json())
+app.use(express.static("public"))
+
+mongoose.connect("mongodb://127.0.0.1:27017/twitterClone")
+
+// USER MODEL
+const User = mongoose.model("User",{
+username:String,
+password:String
+})
+
+// TWEET MODEL
+const Tweet = mongoose.model("Tweet",{
+username:String,
+text:String,
+likes:{type:Number,default:0},
+comments:[String],
+createdAt:{type:Date,default:Date.now}
+})
+
+// REGISTER
+app.post("/register",async(req,res)=>{
+const user = new User(req.body)
+await user.save()
+res.send("User registered")
+})
+
+// LOGIN
+app.post("/login",async(req,res)=>{
+const user = await User.findOne(req.body)
+
+if(user){
+res.send("Login success")
+}else{
+res.send("Invalid credentials")
+}
+})
+
+// CREATE TWEET
+app.post("/tweet",async(req,res)=>{
+const tweet = new Tweet(req.body)
+await tweet.save()
+res.send(tweet)
+})
+
+// GET TWEETS
+app.get("/tweets",async(req,res)=>{
+const tweets = await Tweet.find().sort({createdAt:-1})
+res.send(tweets)
+})
+
+// LIKE TWEET
+app.post("/like/:id",async(req,res)=>{
+const tweet = await Tweet.findById(req.params.id)
+tweet.likes++
+await tweet.save()
+res.send(tweet)
+})
+
+// COMMENT
+app.post("/comment/:id",async(req,res)=>{
+const tweet = await Tweet.findById(req.params.id)
+tweet.comments.push(req.body.comment)
+await tweet.save()
+res.send(tweet)
+})
+
+app.listen(3000,()=>{
+console.log("Server running on port 3000")
+})
