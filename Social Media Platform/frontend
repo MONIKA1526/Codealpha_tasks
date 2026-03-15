@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialHub - Share Your Thoughts</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <h1>📱 SocialHub</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="active">🏠 Home</a></li>
+        <li><a href="pages/explore.html">🔍 Explore</a></li>
+        <li id="authLinks">
+          <a href="pages/login.html">🔐 Login</a>
+          <a href="pages/register.html">✍️ Register</a>
+        </li>
+        <li id="userLinks" style="display:none;">
+          <a href="pages/profile.html">👤 My Profile</a>
+          <a href="#" onclick="logout()">🚪 Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2>Welcome to SocialHub</h2>
+      <p>Share your thoughts with the world 🌍</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="main-container">
+    <!-- Feed Section -->
+    <div class="feed-section">
+      <!-- Post Creator -->
+      <div id="postCreator" class="post-creator" style="display:none;">
+        <div class="creator-header">
+          <h3>✍️ What's on your mind?</h3>
+        </div>
+        <textarea id="postContent" placeholder="Share your thoughts... (max 280 characters)" maxlength="280"></textarea>
+        <div class="char-count">
+          <span id="charCount">0</span>/280
+        </div>
+        <button class="btn btn-primary" onclick="createPost()">📤 Post</button>
+      </div>
+
+      <!-- Posts Feed -->
+      <div id="postsFeed" class="posts-feed">
+        <p style="text-align: center; padding: 40px;">Loading posts...</p>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="suggested-users">
+        <h3>👥 Suggested Users</h3>
+        <div id="suggestedUsersList"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2026 SocialHub. All rights reserved. | Made with ❤️</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/posts.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #1DA1F2;
+  --secondary: #14171A;
+  --light-bg: #F7F9FA;
+  --border: #E1E8ED;
+  --text-dark: #0F1419;
+  --text-light: #657786;
+  --success: #17BF63;
+  --danger: #E0245E;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background-color: white;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+/* NAVBAR */
+.navbar {
+  background-color: white;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand h1 {
+  color: var(--primary);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-menu a {
+  color: var(--text-dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s, border-bottom 0.3s;
+  padding-bottom: 8px;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* HERO SECTION */
+.hero {
+  background: linear-gradient(135deg, var(--primary), #0A8CDA);
+  color: white;
+  padding: 60px 20px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.hero-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.hero-content p {
+  font-size: 1.1rem;
+  opacity: 0.95;
+}
+
+/* MAIN CONTAINER */
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  display: flex;
+  gap: 30px;
+}
+
+.feed-section {
+  flex: 1;
+  max-width: 600px;
+}
+
+/* POST CREATOR */
+.post-creator {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.creator-header h3 {
+  margin-bottom: 15px;
+  color: var(--text-dark);
+  font-size: 1.1rem;
+}
+
+.post-creator textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.3s;
+}
+
+.post-creator textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 8px rgba(29, 161, 242, 0.1);
+}
+
+.char-count {
+  text-align: right;
+  color: var(--text-light);
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+/* POSTS FEED */
+.posts-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.post-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 20px;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.post-card:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.post-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #0A8CDA);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: white;
+  flex-shrink: 0;
+}
+
+.post-author-info {
+  flex: 1;
+}
+
+.post-author {
+  font-weight: bold;
+  color: var(--text-dark);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.post-author:hover {
+  color: var(--primary);
+}
+
+.post-time {
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+
+.post-content {
+  margin: 15px 0;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.post-image {
+  width: 100%;
+  border-radius: 15px;
+  margin: 15px 0;
+  max-height: 300px;
+  object-fit: cover;
+}
+
+.post-stats {
+  display: flex;
+  gap: 20px;
+  padding: 15px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.post-actions {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 12px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background: none;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  transition: color 0.3s, background-color 0.3s;
+  border-radius: 8px;
+}
+
+.action-btn:hover {
+  color: var(--primary);
+  background-color: rgba(29, 161, 242, 0.1);
+}
+
+.action-btn.liked {
+  color: var(--danger);
+}
+
+.action-btn.liked:hover {
+  background-color: rgba(224, 36, 94, 0.1);
+}
+
+/* COMMENTS SECTION */
+.comments-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.comment-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.comment-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  transition: border-color 0.3s;
+}
+
+.comment-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.comment {
+  background-color: var(--light-bg);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: var(--text-dark);
+}
+
+.comment-content {
+  margin-top: 5px;
+  color: var(--text-dark);
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.suggested-users {
+  background: var(--light-bg);
+  border-radius: 15px;
+  padding: 20px;
+  position: sticky;
+  top: 80px;
+  border: 1px solid var(--border);
+}
+
+.suggested-users h3 {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  color: var(--text-dark);
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  border: 1px solid var(--border);
+}
+
+.user-item:hover {
+  background-color: #F0F0F0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #0A8CDA);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.follow-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.follow-btn:hover {
+  background-color: #1A91DA;
+}
+
+.follow-btn.following {
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.follow-btn.following:hover {
+  background-color: rgba(29, 161, 242, 0.1);
+}
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+
+.pagination a,
+.pagination span {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--primary);
+  transition: all 0.3s;
+  font-size: 0.9rem;
+}
+
+.pagination a:hover {
+  background-color: rgba(29, 161, 242, 0.1);
+}
+
+.pagination span.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  font-weight: bold;
+}
+
+/* BUTTONS */
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1A91DA;
+  box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(29, 161, 242, 0.1);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #C71F4E;
+}
+
+/* ALERTS */
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.alert-success {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+  border: 1px solid #A5D6A7;
+}
+
+.alert-error {
+  background-color: #FFEBEE;
+  color: #C62828;
+  border: 1px solid #EF9A9A;
+}
+
+.alert-info {
+  background-color: #E3F2FD;
+  color: #1565C0;
+  border: 1px solid #90CAF9;
+}
+
+/* FORMS */
+.form-container {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 40px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--text-dark);
+  font-size: 1.8rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 8px rgba(29, 161, 242, 0.1);
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--text-light);
+}
+
+.form-footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-footer a:hover {
+  text-decoration: underline;
+}
+
+/* PROFILE PAGE */
+.profile-header {
+  background: linear-gradient(135deg, var(--primary), #0A8CDA);
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(29, 161, 242, 0.2);
+}
+
+.profile-avatar-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  margin: 0 auto 20px;
+  border: 3px solid white;
+}
+
+.profile-name {
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+}
+
+.profile-username {
+  opacity: 0.9;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.profile-bio {
+  opacity: 0.9;
+  margin-bottom: 20px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.profile-stat {
+  text-align: center;
+}
+
+.profile-stat-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: block;
+}
+
+.profile-stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  display: block;
+}
+
+/* FOOTER */
+.footer {
+  background-color: var(--light-bg);
+  border-top: 1px solid var(--border);
+  padding: 30px 0;
+  text-align: center;
+  color: var(--text-light);
+  margin-top: 50px;
+}
+
+.footer-content p {
+  margin: 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .feed-section {
+    max-width: 100%;
+  }
+
+  .suggested-users {
+    position: static;
+  }
+
+  .nav-menu {
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .hero-content h2 {
+    font-size: 1.8rem;
+  }
+
+  .profile-stats {
+    flex-direction: column;
+  }
+
+  .form-container {
+    margin: 30px 15px;
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-brand h1 {
+    font-size: 1.2rem;
+  }
+
+  .nav-menu {
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .nav-menu a {
+    padding-bottom: 4px;
+  }
+
+  .hero-content h2 {
+    font-size: 1.4rem;
+  }
+
+  .hero-content p {
+    font-size: 0.9rem;
+  }
+
+  .post-card {
+    border-radius: 10px;
+    padding: 15px;
+  }
+
+  .main-container {
+    padding: 0 10px;
+  }
+}
+
+/* UTILITY CLASSES */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-light);
+}
+
+.no-posts {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-light);
+}
+const API_URL = 'http://localhost:5000/api';
+let currentPage = 1;
+
+// Check authentication
+function checkAuth() {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  const authLinks = document.getElementById('authLinks');
+  const userLinks = document.getElementById('userLinks');
+  const postCreator = document.getElementById('postCreator');
+
+  if (token && user) {
+    if (authLinks) authLinks.style.display = 'none';
+    if (userLinks) userLinks.style.display = 'flex';
+    if (postCreator) postCreator.style.display = 'block';
+  } else {
+    if (authLinks) authLinks.style.display = 'flex';
+    if (userLinks) userLinks.style.display = 'none';
+    if (postCreator) postCreator.style.display = 'none';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  showAlert('Logged out successfully!', 'success');
+  setTimeout(() => {
+    window.location.href = 'index.html';
+  }, 1500);
+}
+
+function showAlert(message, type = 'info') {
+  const alertDiv = document.createElement('div');
+  alertDiv.className = `alert alert-${type}`;
+  alertDiv.innerHTML = `
+    <strong>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</strong>
+    ${message}
+  `;
+
+  const body = document.body;
+  body.insertAdjacentElement('afterbegin', alertDiv);
+
+  setTimeout(() => {
+    alertDiv.remove();
+  }, 3000);
+}
+
+function getAuthToken() {
+  return localStorage.getItem('token');
+}
+
+function getAuthHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${getAuthToken()}`,
+  };
+}
+
+function isLoggedIn() {
+  return !!getAuthToken();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  checkAuth();
+});
+// REGISTER
+const registerForm = document.getElementById('registerForm');
+if (registerForm) {
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (!username || !email || !password) {
+      showAlert('All fields are required', 'error');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showAlert('Passwords do not match', 'error');
+      return;
+    }
+
+    if (password.length < 6) {
+      showAlert('Password must be at least 6 characters', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, confirmPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showAlert(data.error || 'Registration failed', 'error');
+        return;
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      showAlert('✅ Registration successful! Redirecting...', 'success');
+      setTimeout(() => {
+        window.location.href = '../index.html';
+      }, 2000);
+    } catch (error) {
+      showAlert('An error occurred. Please try again.', 'error');
+    }
+  });
+}
+
+// LOGIN
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+      showAlert('Email and password are required', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showAlert(data.error || 'Login failed', 'error');
+        return;
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      showAlert('✅ Login successful! Redirecting...', 'success');
+      setTimeout(() => {
+        window.location.href = '../index.html';
+      }, 2000);
+    } catch (error) {
+      showAlert('An error occurred. Please try again.', 'error');
+    }
+  });
+}
+// ==================== CREATE POST ====================
+async function createPost() {
+  if (!isLoggedIn()) {
+    showAlert('❌ Please login to create a post', 'error');
+    return;
+  }
+
+  const postContentElement = document.getElementById('postContent');
+  if (!postContentElement) {
+    showAlert('❌ Post form not found', 'error');
+    return;
+  }
+
+  const content = postContentElement.value.trim();
+
+  if (!content) {
+    showAlert('❌ Post content cannot be empty', 'error');
+    return;
+  }
+
+  if (content.length > 280) {
+    showAlert('❌ Post cannot exceed 280 characters', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/posts`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ content }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showAlert(`❌ ${data.error || 'Failed to create post'}`, 'error');
+      return;
+    }
+
+    // Clear form
+    postContentElement.value = '';
+    const charCountElement = document.getElementById('charCount');
+    if (charCountElement) {
+      charCountElement.textContent = '0';
+    }
+
+    showAlert('✅ Post created successfully!', 'success');
+    loadPosts(1);
+  } catch (error) {
+    console.error('Error creating post:', error);
+    showAlert('❌ Error creating post', 'error');
+  }
+}
+
+// ==================== LOAD POSTS ====================
+async function loadPosts(page = 1) {
+  try {
+    if (!API_URL) {
+      showAlert('❌ API URL not configured', 'error');
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/posts?page=${page}&limit=10`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    displayPosts(data.posts || []);
+    displayPagination(page, data.totalPages || 1);
+    loadSuggestedUsers();
+    currentPage = page;
+  } catch (error) {
+    console.error('Error loading posts:', error);
+    showAlert('❌ Error loading posts', 'error');
+  }
+}
+
+// ==================== DISPLAY POSTS ====================
+function displayPosts(posts) {
+  const feed = document.getElementById('postsFeed');
+
+  if (!feed) {
+    console.error('Posts feed container not found');
+    return;
+  }
+
+  if (!posts || posts.length === 0) {
+    feed.innerHTML = '<div class="no-posts"><p>📭 No posts yet. Be the first to post!</p></div>';
+    return;
+  }
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+  try {
+    feed.innerHTML = posts.map(post => {
+      // Safely get post data
+      const postId = post._id || '';
+      const authorName = post.author?.username || 'Unknown';
+      const authorId = post.author?._id || '';
+      const authorImage = post.author?.profileImage || '👤';
+      const postContent = escapeHtml(post.content || '');
+      const createdDate = new Date(post.createdAt).toLocaleDateString();
+      const likesCount = post.likesCount || 0;
+      const commentsCount = post.commentsCount || 0;
+      const comments = post.comments || [];
+      const isOwnPost = authorId === currentUser.id;
+
+      return `
+        <div class="post-card" data-post-id="${postId}">
+          <div class="post-header">
+            <div class="post-avatar">${authorImage}</div>
+            <div class="post-author-info">
+              <div class="post-author" onclick="viewProfile('${authorName}')" style="cursor: pointer;">
+                ${authorName}
+              </div>
+              <div class="post-time">${createdDate}</div>
+            </div>
+          </div>
+
+          <div class="post-content">${postContent}</div>
+
+          <div class="post-stats">
+            <span>❤️ ${likesCount} Likes</span>
+            <span>💬 ${commentsCount} Comments</span>
+          </div>
+
+          <div class="post-actions">
+            <button class="action-btn" onclick="likePost('${postId}')" style="cursor: pointer;">❤️ Like</button>
+            <button class="action-btn" onclick="toggleComments('${postId}')" style="cursor: pointer;">💬 Comment</button>
+            ${isOwnPost ? `
+              <button class="action-btn" onclick="deletePost('${postId}')" style="cursor: pointer;">🗑️ Delete</button>
+            ` : ''}
+          </div>
+
+          <div id="comments-${postId}" class="comments-section" style="display:none;">
+            <div class="comment-form">
+              <input type="text" placeholder="💬 Add a comment..." id="comment-input-${postId}" />
+              <button class="btn btn-primary" style="padding: 6px 16px; font-size: 0.9rem; width: auto; cursor: pointer;" onclick="addComment('${postId}')">Post</button>
+            </div>
+            <div id="comments-list-${postId}">
+              ${comments.map(comment => `
+                <div class="comment">
+                  <div class="comment-author">${escapeHtml(comment.author?.username || 'Unknown')}</div>
+                  <div class="comment-content">${escapeHtml(comment.content || '')}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Error displaying posts:', error);
+    feed.innerHTML = '<p style="text-align: center; color: red;">❌ Error displaying posts</p>';
+  }
+}
+
+// ==================== LIKE POST ====================
+async function likePost(postId) {
+  if (!isLoggedIn()) {
+    showAlert('❌ Please login to like posts', 'error');
+    return;
+  }
+
+  if (!postId) {
+    showAlert('❌ Post ID not found', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/posts/${postId}/like`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+
+    if (response.ok) {
+      loadPosts(currentPage);
+      showAlert('❤️ Post liked!', 'success');
+    } else {
+      const data = await response.json();
+      showAlert(`❌ ${data.error || 'Failed to like post'}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error liking post:', error);
+    showAlert('❌ Error liking post', 'error');
+  }
+}
+
+// ==================== UNLIKE POST ====================
+async function unlikePost(postId) {
+  if (!isLoggedIn()) {
+    showAlert('❌ Please login to unlike posts', 'error');
+    return;
+  }
+
+  if (!postId) {
+    showAlert('❌ Post ID not found', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/posts/${postId}/unlike`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+
+    if (response.ok) {
+      loadPosts(currentPage);
+      showAlert('💔 Post unliked!', 'success');
+    } else {
+      const data = await response.json();
+      showAlert(`❌ ${data.error || 'Failed to unlike post'}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error unliking post:', error);
+    showAlert('❌ Error unliking post', 'error');
+  }
+}
+
+// ==================== ADD COMMENT ====================
+async function addComment(postId) {
+  if (!isLoggedIn()) {
+    showAlert('❌ Please login to comment', 'error');
+    return;
+  }
+
+  if (!postId) {
+    showAlert('❌ Post ID not found', 'error');
+    return;
+  }
+
+  const inputElement = document.getElementById(`comment-input-${postId}`);
+  if (!inputElement) {
+    showAlert('❌ Comment input not found', 'error');
+    return;
+  }
+
+  const content = inputElement.value.trim();
+
+  if (!content) {
+    showAlert('❌ Comment cannot be empty', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/posts/${postId}/comment`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ content }),
+    });
+
+    if (response.ok) {
+      inputElement.value = '';
+      loadPosts(currentPage);
+      showAlert('💬 Comment added!', 'success');
+    } else {
+      const data = await response.json();
+      showAlert(`❌ ${data.error || 'Failed to add comment'}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    showAlert('❌ Error adding comment', 'error');
+  }
+}
+
+// ==================== DELETE COMMENT ====================
+async function deleteComment(postId, commentId) {
+  if (!isLoggedIn()) {
+    showAlert('❌ Please login to delete comments', 'error');
+    return;
+  }
+
+  if (!postId || !commentId) {
+    showAlert('❌ Post or comment ID not found', 'error');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to delete this comment?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/posts/${postId}/comment/${commentId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (response.ok) {
+      loadPosts(currentPage);
+      showAlert('🗑️ Comment deleted!', 'success');
+    } else {
+      const data = await response.json();
+      showAlert(`❌ ${data.error || 'Failed to delete comment'}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    showAlert('❌ Error deleting comment', 'error');
+  }
+}
+
+// ==================== DELETE POST ====================
+async function deletePost(postId) {
+  if (!isLoggedIn()) {
+    showAlert('❌ Please login to delete posts', 'error');
+    return;
+  }
+
+  if (!postId) {
+    showAlert('❌ Post ID not found', 'error');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to delete this post?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/posts/${postId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (response.ok) {
+      loadPosts(currentPage);
+      showAlert('🗑️ Post deleted!', 'success');
+    } else {
+      const data = await response.json();
+      showAlert(`❌ ${data.error || 'Failed to delete post'}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    showAlert('❌ Error deleting post', 'error');
+  }
+}
+
+// ==================== TOGGLE COMMENTS ====================
+function toggleComments(postId) {
+  if (!postId) {
+    showAlert('❌ Post ID not found', 'error');
+    return;
+  }
+
+  const section = document.getElementById(`comments-${postId}`);
+  if (section) {
+    section.style.display = section.style.display === 'none' ? 'block' : 'none';
+  } else {
+    showAlert('❌ Comments section not found', 'error');
+  }
+}
+
+// ==================== DISPLAY PAGINATION ====================
+function displayPagination(currentPageNum, totalPages) {
+  const pagination = document.getElementById('pagination');
+
+  if (!pagination) {
+    console.error('Pagination container not found');
+    return;
+  }
+
+  // If only one page, don't show pagination
+  if (totalPages <= 1) {
+    pagination.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+
+  // Previous buttons
+  if (currentPageNum > 1) {
+    html += `<a onclick="loadPostsPage(1)" style="cursor: pointer;">« First</a>`;
+    html += `<a onclick="loadPostsPage(${currentPageNum - 1})" style="cursor: pointer;">‹ Previous</a>`;
+  }
+
+  // Page numbers
+  const startPage = Math.max(1, currentPageNum - 2);
+  const endPage = Math.min(totalPages, currentPageNum + 2);
+
+  for (let i = startPage; i <= endPage; i++) {
+    if (i === currentPageNum) {
+      html += `<span class="active">${i}</span>`;
+    } else {
+      html += `<a onclick="loadPostsPage(${i})" style="cursor: pointer;">${i}</a>`;
+    }
+  }
+
+  // Next buttons
+  if (currentPageNum < totalPages) {
+    html += `<a onclick="loadPostsPage(${currentPageNum + 1})" style="cursor: pointer;">Next ›</a>`;
+    html += `<a onclick="loadPostsPage(${totalPages})" style="cursor: pointer;">Last »</a>`;
+  }
+
+  pagination.innerHTML = html;
+}
+
+// ==================== LOAD POSTS PAGE ====================
+function loadPostsPage(page) {
+  if (!page || page < 1) {
+    showAlert('❌ Invalid page number', 'error');
+    return;
+  }
+
+  loadPosts(page);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==================== INITIALIZE ====================
+document.addEventListener('DOMContentLoaded', () => {
+  // Load posts if on home page
+  const postsFeed = document.getElementById('postsFeed');
+  if (postsFeed) {
+    loadPosts();
+  }
+
+  // Character counter for post textarea
+  const textarea = document.getElementById('postContent');
+  if (textarea) {
+    textarea.addEventListener('input', (e) => {
+      const charCount = document.getElementById('charCount');
+      if (charCount) {
+        charCount.textContent = e.target.value.length;
+      }
+    });
+  }
+});
+async function loadSuggestedUsers() {
+  try {
+    const response = await fetch(`${API_URL}/users`);
+    const users = await response.json();
+
+    const container = document.getElementById('suggestedUsersList');
+    if (!container) return;
+
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+    const currentUserId = currentUser?.id;
+
+    container.innerHTML = users
+      .filter(u => u._id !== currentUserId)
+      .slice(0, 5)
+      .map(user => `
+        <div class="user-item">
+          <div class="user-avatar">${user.profileImage || '👤'}</div>
+          <div class="user-info">
+            <div class="user-name">${user.username}</div>
+          </div>
+          <button class="follow-btn" onclick="followUser('${user._id}')">Follow</button>
+        </div>
+      `).join('');
+  } catch (error) {
+    console.error('Error loading suggested users:', error);
+  }
+}
+
+async function viewProfile(username) {
+  window.location.href = `profile.html?username=${username}`;
+}
+
+async function followUser(userId) {
+  if (!isLoggedIn()) {
+    showAlert('❌ Please login to follow users', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/users/${userId}/follow`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+
+    if (response.ok) {
+      showAlert('✅ User followed!', 'success');
+      loadSuggestedUsers();
+    } else {
+      const data = await response.json();
+      showAlert(`❌ ${data.error}`, 'error');
+    }
+  } catch (error) {
+    showAlert('❌ Error following user', 'error');
+  }
+}
+
+async function loadProfilePage() {
+  const params = new URLSearchParams(window.location.search);
+  const username = params.get('username');
+
+  if (!username) {
+    showAlert('❌ Username not found', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/users/${username}`);
+    const user = await response.json();
+
+    if (!response.ok) {
+      showAlert(`❌ ${user.error}`, 'error');
+      return;
+    }
+
+    displayProfileHeader(user);
+    await loadUserPosts(username);
+  } catch (error) {
+    showAlert('❌ Error loading profile', 'error');
+  }
+}
+
+function displayProfileHeader(user) {
+  const headerContainer = document.getElementById('profileHeader');
+  if (!headerContainer) return;
+
+  headerContainer.innerHTML = `
+    <div class="profile-header">
+      <div class="profile-avatar-large">${user.profileImage || '👤'}</div>
+      <div class="profile-name">@${user.username}</div>
+      ${user.bio ? `<div class="profile-bio">${escapeHtml(user.bio)}</div>` : ''}
+      
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <span class="profile-stat-number">${user.postsCount || 0}</span>
+          <span class="profile-stat-label">Posts</span>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat-number">${user.followers?.length || 0}</span>
+          <span class="profile-stat-label">Followers</span>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat-number">${user.following?.length || 0}</span>
+          <span class="profile-stat-label">Following</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function loadUserPosts(username) {
+  try {
+    const response = await fetch(`${API_URL}/posts/user/${username}`);
+    const posts = await response.json();
+
+    const postsContainer = document.getElementById('userPosts');
+    if (!postsContainer) return;
+
+    if (!posts || posts.length === 0) {
+      postsContainer.innerHTML = '<p class="no-posts">📭 No posts yet</p>';
+      return;
+    }
+
+    postsContainer.innerHTML = posts.map(post => `
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar">${post.author.profileImage || '👤'}</div>
+          <div class="post-author-info">
+            <div class="post-author">${post.author.username}</div>
+            <div class="post-time">${new Date(post.createdAt).toLocaleDateString()}</div>
+          </div>
+        </div>
+
+        <div class="post-content">${escapeHtml(post.content)}</div>
+
+        <div class="post-stats">
+          <span>❤️ ${post.likesCount} Likes</span>
+          <span>💬 ${post.commentsCount} Comments</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    showAlert('❌ Error loading user posts', 'error');
+  }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - SocialHub</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <h1>📱 SocialHub</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="../index.html">🏠 Home</a></li>
+        <li><a href="register.html">✍️ Register</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Login Form -->
+  <div class="form-container">
+    <h2>🔐 Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Login</button>
+
+      <div class="form-footer" style="margin-top: 20px;">
+        <p>Don't have an account? <a href="register.html">Register here</a></p>
+      </div>
+    </form>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2026 SocialHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - SocialHub</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <h1>📱 SocialHub</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="../index.html">🏠 Home</a></li>
+        <li><a href="login.html">🔐 Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Register Form -->
+  <div class="form-container">
+    <h2>✍️ Create Account</h2>
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Register</button>
+
+      <div class="form-footer" style="margin-top: 20px;">
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+      </div>
+    </form>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2026 SocialHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - SocialHub</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <h1>📱 SocialHub</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="../index.html">🏠 Home</a></li>
+        <li><a href="explore.html">🔍 Explore</a></li>
+        <li id="userLinks">
+          <a href="#" onclick="logout(); return false;">🚪 Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="feed-section" style="max-width: 100%;">
+      <!-- Profile Header -->
+      <div id="profileHeader">
+        <p style="text-align: center; padding: 40px;">Loading profile...</p>
+      </div>
+
+      <!-- User Posts -->
+      <div id="userPosts" class="posts-feed">
+        <p style="text-align: center; padding: 40px;">Loading posts...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2026 SocialHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/profile.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProfilePage();
+    });
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore - SocialHub</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <h1>📱 SocialHub</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="../index.html">🏠 Home</a></li>
+        <li><a href="explore.html" class="active">🔍 Explore</a></li>
+        <li id="userLinks">
+          <a href="profile.html">👤 My Profile</a>
+          <a href="#" onclick="logout(); return false;">🚪 Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2>🔍 Explore Users</h2>
+      <p>Discover amazing people on SocialHub</p>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="feed-section" style="max-width: 100%;">
+      <!-- Users Grid -->
+      <div id="usersGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+        <p style="text-align: center; padding: 40px; grid-column: 1/-1;">Loading users...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2026 SocialHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/profile.js"></script>
+  <script>
+    async function loadAllUsers() {
+      try {
+        const response = await fetch(`${API_URL}/users`);
+        const users = await response.json();
+
+        const grid = document.getElementById('usersGrid');
+        
+        if (!users || users.length === 0) {
+          grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No users found</p>';
+          return;
+        }
+
+        grid.innerHTML = users.map(user => `
+          <div class="post-card" style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">${user.profileImage || '👤'}</div>
+            <h3 style="margin-bottom: 5px;">${user.username}</h3>
+            ${user.bio ? `<p style="color: #657786; margin-bottom: 15px;">${user.bio}</p>` : ''}
+            <div style="display: flex; justify-content: space-around; margin-bottom: 15px; font-size: 0.9rem;">
+              <div><strong>${user.postsCount || 0}</strong><br/>Posts</div>
+              <div><strong>${user.followers?.length || 0}</strong><br/>Followers</div>
+              <div><strong>${user.following?.length || 0}</strong><br/>Following</div>
+            </div>
+            <button class="btn btn-primary" onclick="viewProfile('${user.username}')">View Profile</button>
+          </div>
+        `).join('');
+      } catch (error) {
+        showAlert('❌ Error loading users', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      loadAllUsers();
+    });
+  </script>
+</body>
+</html>
